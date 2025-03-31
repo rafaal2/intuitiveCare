@@ -1,0 +1,63 @@
+criação de tabelas
+CREATE TABLE demonstracoes_contabeis (
+    id SERIAL PRIMARY KEY,
+    data DATE NOT NULL,
+    reg_ans VARCHAR(20) NOT NULL,
+    cd_conta_contabil VARCHAR(50) NOT NULL,
+    descricao VARCHAR(255) NOT NULL,
+    vl_saldo_inicial DECIMAL(15,2),
+    vl_saldo_final DECIMAL(15,2)
+);
+
+CREATE TABLE operadoras_ativas (
+    registro_ans VARCHAR(20) PRIMARY KEY,
+    cnpj VARCHAR(20),
+    razao_social VARCHAR(255),
+    nome_fantasia VARCHAR(255),
+    modalidade VARCHAR(100),
+    logradouro VARCHAR(255),
+    numero VARCHAR(50),
+    complemento VARCHAR(100),
+    bairro VARCHAR(100),
+    cidade VARCHAR(100),
+    uf CHAR(2),
+    cep VARCHAR(20),
+    ddd VARCHAR(5),
+    telefone VARCHAR(20),
+    fax VARCHAR(20),
+    endereco_eletronico VARCHAR(100),
+    representante VARCHAR(100),
+    cargo_representante VARCHAR(100),
+    regiao_comercializacao INT,
+    data_registro_ans DATE
+);
+
+queries analiticas
+Quais as 10 operadoras com maiores despesas em "EVENTOS/ SINISTROS CONHECIDOS OU
+AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR" no último trimestre?
+
+SELECT 
+    d.reg_ans,
+    o.razao_social,
+    SUM(d.vl_saldo_final) AS total_despesa
+FROM demonstracoes_contabeis d
+JOIN operadoras_ativas o ON d.reg_ans = o.registro_ans
+WHERE d.descricao ILIKE '%EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR%'
+  AND d.data BETWEEN '2024-10-01' AND '2024-12-31'
+GROUP BY d.reg_ans, o.razao_social
+ORDER BY total_despesa DESC
+LIMIT 10;
+
+Quais as 10 operadoras com maiores despesas nessa categoria no último ano?
+
+SELECT 
+    d.reg_ans AS registro_ans,
+    o.razao_social,
+    SUM(d.vl_saldo_final) AS total_despesas
+FROM demonstracoes_contabeis d
+INNER JOIN operadoras_ativas o ON d.reg_ans = o.registro_ans
+WHERE d.descricao LIKE '%EVENTOS/ SINISTROS CONHECIDOS OU AVISADOS DE ASSISTÊNCIA A SAÚDE MEDICO HOSPITALAR%'
+  AND d.data BETWEEN '2024-01-01' AND '2024-12-31'
+GROUP BY d.reg_ans, o.razao_social
+ORDER BY total_despesas DESC
+LIMIT 10;
